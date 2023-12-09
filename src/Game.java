@@ -75,32 +75,26 @@ public class Game {
                     if (row == 0 && (col == 0 || col == 7)) {
                         piece.setPieceType("Rook");
                         piece.setIcon(wRook);
-                        piece.setPieceObject(new Rook("Rook", row, col, "White", wRook, true));
                     }
                     if (row == 0 && (col == 1 || col == 6)) {
                         piece.setPieceType("Knight");
                         piece.setIcon(wKnight);
-                        piece.setPieceObject(new Knight("Knight", row, col, "White", wKnight, true));
                     }
                     if (row == 0 && (col == 2 || col == 5)) {
                         piece.setPieceType("Bishop");
                         piece.setIcon(wBishop);
-                        piece.setPieceObject(new Bishop("Bishop", row, col, "White", wBishop, true));
                     }
                     if (row == 0 && col == 4) {
                         piece.setPieceType("Queen");
                         piece.setIcon(wQueen);
-                        piece.setPieceObject(new Queen("Queen", row, col, "White", wQueen, true));
                     }
                     if (row == 0 && col == 3) {
                         piece.setPieceType("King");
                         piece.setIcon(wKing);
-                        piece.setPieceObject(new King("King", row, col, "White", wKing, true));
                     }
                     if (row == 1) {
                         piece.setPieceType("Pawn");
                         piece.setIcon(wPawn);
-                        piece.setPieceObject(new Pawn("Pawn", row, col, "White", wPawn, true, false));
                     }
                 }
 
@@ -110,32 +104,26 @@ public class Game {
                     if (row == 7 && (col == 0 || col == 7)) {
                         piece.setPieceType("Rook");
                         piece.setIcon(bRook);
-                        piece.setPieceObject(new Rook("Rook", row, col, "Black", bRook, true));
                     }
                     if (row == 7 && (col == 1 || col == 6)) {
                         piece.setPieceType("Knight");
                         piece.setIcon(bKnight);
-                        piece.setPieceObject(new Knight("Knight", row, col, "Black", bKnight, true));
                     }
                     if (row == 7 && (col == 2 || col == 5)) {
                         piece.setPieceType("Bishop");
                         piece.setIcon(bBishop);
-                        piece.setPieceObject(new Bishop("Bishop", row, col, "Black", bBishop, true));
                     }
                     if (row == 7 && col == 4) {
                         piece.setPieceType("Queen");
                         piece.setIcon(bQueen);
-                        piece.setPieceObject(new Queen("Queen", row, col, "Black", bQueen, true));
                     }
                     if (row == 7 && col == 3) {
                         piece.setPieceType("King");
                         piece.setIcon(bKing);
-                        piece.setPieceObject(new King("King", row, col, "Black", bKing, true));
                     }
                     if (row == 6) {
                         piece.setPieceType("Pawn");
                         piece.setIcon(bPawn);
-                        piece.setPieceObject(new Pawn("Pawn", row, col, "Black", bPawn, true, false));
                     }
                 }
                 piece.setRow(row);
@@ -147,7 +135,6 @@ public class Game {
                 // piece.addMouseMotionListener(pieceListener);
                 piece.setBackground(color);
                 piece.setOccupied(true);
-                PieceButton testPiece = piece;
                 buttonList[row][col] = piece;
                 frame.add(piece);
             }
@@ -241,7 +228,6 @@ public class Game {
         private ImageIcon pieceImage;
         private Color squareColor;
         private boolean isOccupied;
-        private Piece pieceObject;
 
         public PieceButton() {
             setPreferredSize(new Dimension(900, 900));
@@ -249,14 +235,29 @@ public class Game {
             setBorderPainted(false);
         }
 
-        public PieceButton(int row, int col, Piece pieceObject, String pieceColor, String pieceType,
+        public PieceButton(int row, int col, String pieceColor, String pieceType,
                 ImageIcon pieceImage) {
             this.row = row;
             this.col = col;
             this.pieceType = pieceType;
             this.pieceColor = pieceColor;
             this.pieceImage = pieceImage;
-            this.pieceObject = pieceObject;
+        }
+
+        /**
+         * Evaluates if a piece type is the same as another piece type
+         * Example, if current piece is a pawn and the other piece is a
+         * pawn, it returns true.
+         * 
+         * @param piece
+         * @return true or false
+         */
+        public boolean pieceEvaluation(Piece piece) {
+            String pieceString = getPieceType().substring(0, 1);
+            if (pieceString.equals(piece.getPieceType().substring(0, 1))) {
+                return true;
+            }
+            return false;
         }
 
         public int getRow() {
@@ -317,14 +318,6 @@ public class Game {
 
         public void setOccupied(boolean isOccupied) {
             this.isOccupied = isOccupied;
-        }
-
-        public Piece getPieceObject() {
-            return pieceObject;
-        }
-
-        public void setPieceObject(Piece pieceObject) {
-            this.pieceObject = pieceObject;
         }
 
     }
@@ -477,6 +470,17 @@ public class Game {
                                         pawn.getPieceImage(), true);
                                 possibleMoves.add(move);
                             }
+                            // Enpassent
+                            int colDiff = Math.abs(testPawn.getCol() - pawn.getCol());
+                            int row = pawn.getRow();
+                            int col = pawn.getCol();
+
+                            if (colDiff == 1 && row == testPawn.getRow() && chessBoard[row][col] instanceof Pawn
+                                    && ((Pawn) chessBoard[row][col]).isEnPassent()) {
+                                Piece move = new Piece("Pawn", pawn.getRow(), pawn.getCol() - 1, "White",
+                                        pawn.getPieceImage(), true);
+                                possibleMoves.add(move);
+                            }
                         }
                     }
                 }
@@ -484,6 +488,17 @@ public class Game {
                     for (Piece pawn : bPieces) {
                         if (pawn instanceof Pawn) {
                             if (pawn.getRow() == 4 && Math.abs(pawn.getCol() - piece.getCol()) == 1) {
+                                Piece move = new Piece("Pawn", pawn.getRow(), pawn.getCol() - 1, "White",
+                                        pawn.getPieceImage(), true);
+                                possibleMoves.add(move);
+                            }
+                            int colDiff = Math.abs(testPawn.getCol() - pawn.getCol());
+                            int row = pawn.getRow();
+                            int col = pawn.getCol();
+
+                            // Enpassent
+                            if (colDiff == 1 && row == testPawn.getRow() && chessBoard[row][col] instanceof Pawn
+                                    && ((Pawn) chessBoard[row][col]).isEnPassent()) {
                                 Piece move = new Piece("Pawn", pawn.getRow(), pawn.getCol() - 1, "White",
                                         pawn.getPieceImage(), true);
                                 possibleMoves.add(move);
@@ -549,6 +564,7 @@ public class Game {
                     movePieceLogic(board, rookSourceButtonKSide, rookTargetButtonKSide);
                 }
             }
+
             // Normal move
             else {
                 movePieceLogic(board, sourceButton, targetButton);
@@ -565,7 +581,6 @@ public class Game {
             String pieceType = sourceButton.getPieceType();
             String pieceColor = sourceButton.getPieceColor();
             Icon pieceImage = sourceButton.getIcon();
-            Piece pieceObject = sourceButton.getPieceObject();
 
             // Get coordinates
             int targetRow = targetButton.getRow();
@@ -577,11 +592,6 @@ public class Game {
             targetButton.setPieceType(pieceType);
             targetButton.setPieceColor(pieceColor);
             targetButton.setIcon(pieceImage);
-
-            // Want to switch from the previous block of code to this method since this will
-            // update the back end properly however it causes the front end to glitch
-            // Updating the arryaList doesn't properly remove the previous piece
-            // pieceObject.move(sourceRow, sourceCol, board, chessBoard);
 
             // Update the chessBoard array
             chessBoard[targetRow][targetCol] = chessBoard[sourceRow][sourceCol];
@@ -596,18 +606,16 @@ public class Game {
                 }
             }
             // Update the chessBoard arrayList
-            Piece newLocPiece = pieceObject;
-            if (pieceObject.getPieceColor().equals("White")) {
+
+            Piece newLocPiece = new Piece(pieceType, targetRow, targetCol, pieceColor, pieceImage, true);
+
+            if (pieceColor.equals("White")) {
                 board.findPiece(wPieces, sourceRow, sourceCol).setRow(targetRow);
                 board.findPiece(wPieces, targetRow, sourceCol).setCol(targetCol);
-                newLocPiece.setRow(targetRow);
-                newLocPiece.setCol(targetCol);
             }
-            if (pieceObject.getPieceColor().equals("Black")) {
+            if (pieceColor.equals("Black")) {
                 board.findPiece(bPieces, sourceRow, sourceCol).setRow(targetRow);
                 board.findPiece(bPieces, targetRow, sourceCol).setCol(targetCol);
-                newLocPiece.setRow(targetRow);
-                newLocPiece.setCol(targetCol);
             }
 
             chessBoard[targetRow][targetCol].setPieceObject(newLocPiece);

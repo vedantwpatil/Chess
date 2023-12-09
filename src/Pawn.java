@@ -3,20 +3,18 @@ import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 public class Pawn extends Piece {
-    private boolean hasMoved;
+    private boolean enPassent;
 
     public Pawn(String pieceType, int row, int col, String pieceColor, ImageIcon pieceImage, boolean isOccupied,
-            boolean hasMoved) {
+            boolean enPassent) {
         super("Pawn", row, col, pieceColor, pieceImage, isOccupied);
         // TODO Auto-generated constructor stub
-        this.hasMoved = hasMoved;
+        this.enPassent = enPassent;
     }
 
     @Override
     public boolean canMove(Board board, Piece[][] chessBoard, int newRow, int newCol) {
-        ArrayList<Piece> wPieces = board.getWhitePieces();
-        ArrayList<Piece> bPieces = board.getBlackPieces();
-
+        
         // Calculate the row and column difference
         int rowDiff = Math.abs(newRow - this.getRow());
         int colDiff = Math.abs(newCol - this.getCol());
@@ -26,10 +24,12 @@ public class Pawn extends Piece {
             if (this.getPieceColor().equals("White")) {
                 // Normal forward move
                 if (colDiff == 0 && newRow == this.getRow() + 1) {
+                    this.setEnPassent(false);
                     return true;
                 }
                 // First move option: move forward by two squares
                 if (colDiff == 0 && newRow == this.getRow() + 2 && this.getRow() == 1) {
+                    this.setEnPassent(true);
                     return true;
                 }
             }
@@ -38,10 +38,12 @@ public class Pawn extends Piece {
             if (this.getPieceColor().equals("Black")) {
                 // Normal forward move
                 if (colDiff == 0 && newRow == this.getRow() - 1) {
+                    this.setEnPassent(false);
                     return true;
                 }
                 // First move option: move forward by two squares
                 if (colDiff == 0 && newRow == this.getRow() - 2 && this.getRow() == 6) {
+                    this.setEnPassent(true);
                     return true;
                 }
             }
@@ -49,6 +51,7 @@ public class Pawn extends Piece {
 
             // If the square is occupied, check if we can capture the piece
             if (!(this.getPieceColor().equals(chessBoard[newRow][newCol].getPieceColor()))) {
+                // Normal Captures
                 if (this.getPieceColor().equals("White")) {
                     if (colDiff == 1 && rowDiff == 1 && newRow == this.getRow() + 1) {
                         return true;
@@ -58,6 +61,11 @@ public class Pawn extends Piece {
                     if (colDiff == 1 && rowDiff == 1 && newRow == this.getRow() - 1) {
                         return true;
                     }
+                }
+                // Enpassent
+                else if (colDiff == 1 && newRow == this.getRow() && chessBoard[newRow][newCol] instanceof Pawn
+                        && ((Pawn) chessBoard[newRow][newCol]).isEnPassent()) {
+                    return true;
                 }
             }
         }
@@ -72,11 +80,11 @@ public class Pawn extends Piece {
         }
     }
 
-    public boolean isHasMoved() {
-        return hasMoved;
+    public boolean isEnPassent() {
+        return enPassent;
     }
 
-    public void setHasMoved(boolean hasMoved) {
-        this.hasMoved = hasMoved;
+    public void setEnPassent(boolean hasMoved) {
+        this.enPassent = hasMoved;
     }
 }

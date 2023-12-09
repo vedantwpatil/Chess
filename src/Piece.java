@@ -297,7 +297,7 @@ public class Piece extends JComponent {
 
     @Override
     public String toString() {
-        return "Piece [pieceObject=" + pieceObject + ", pieceType=" + pieceType + ", row=" + row + ", col=" + col
+        return "Piece [pieceType=" + pieceType + ", row=" + row + ", col=" + col
                 + ", pieceColor=" + pieceColor + ", isOccupied=" + isOccupied + ", pieceImage=" + pieceImage + "]";
     }
 
