@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 import javax.swing.ImageIcon;
 
 public class Pawn extends Piece {
@@ -84,7 +82,7 @@ public class Pawn extends Piece {
         return enPassent;
     }
 
-    public void setEnPassent(boolean hasMoved) {
-        this.enPassent = hasMoved;
+    public void setEnPassent(boolean enPassent) {
+        this.enPassent = enPassent;
     }
 }

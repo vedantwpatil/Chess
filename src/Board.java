@@ -6,6 +6,7 @@ public class Board {
     private Piece[][] chessBoard;
     private ArrayList<Piece> whitePieces;
     private ArrayList<Piece> blackPieces;
+    private Stack<Piece> moves;
 
     // Pawn image
     ImageIcon wPawn = new ImageIcon(
@@ -46,7 +47,7 @@ public class Board {
     // Sets up the default start position
     public Board() {
         chessBoard = new Piece[8][8];
-
+        moves = new Stack<>();
         whitePieces = new ArrayList<>();
 
         // Add white pieces to the ArrayList
@@ -138,9 +139,6 @@ public class Board {
         ArrayList<Piece> possibleMoves = new ArrayList<Piece>();
 
         for (Piece piece : bPieces) {
-            // Debug
-            System.out.println(piece);
-
             possibleMoves.addAll(piece.getPossibleMoves(board, currentChessBoard));
         }
         return possibleMoves;
@@ -170,4 +168,62 @@ public class Board {
         this.blackPieces = blackPieces;
     }
 
+    public Stack<Piece> getMoves() {
+        return moves;
+    }
+
+    public void setMoves(Stack<Piece> moves) {
+        this.moves = moves;
+    }
+
+    public Piece getLastMove() {
+        if (moves.size() >= 1) {
+            return moves.get(moves.size() - 1);
+        }
+        return null;
+    }
+
+    public Piece getSecondLastMove() {
+        if (moves.size() >= 2) {
+            return moves.get(moves.size() - 2);
+        }
+        return null;
+    }
+
+    public void addMove(Piece piece, int sourceRow, int sourceCol, int targetRow, int targetCol) {
+        // Don't need image and occupied information so we make a new piece object to
+        // add but we need where the piece moved from and the square its moving to
+        Piece movedPiece = new Piece(piece.getPieceType(), sourceRow, sourceCol, targetCol, targetCol,
+                piece.getPieceColor());
+        moves.add(movedPiece);
+    }
+
+    public void setEnPassantFlag(Board board, int newRow, int newCol) {
+        Piece lastMove = board.getLastMove();
+        Piece secondLastMove = board.getSecondLastMove();
+        if (lastMove != null) {
+            if (lastMove instanceof Pawn && Math.abs(lastMove.getTargetRow() - lastMove.getSourceRow()) == 2) {
+                // The last move was a double-move by an opponent's pawn
+                int targetRow = (lastMove.getPieceColor().equals("White")) ? lastMove.getRow() + 1
+                        : lastMove.getRow() - 1;
+                if (targetRow == newRow && lastMove.getTargetCol() == newCol) {
+                    ((Pawn) lastMove).setEnPassent(true);
+                }
+            }
+        }
+        // If the opponent didnt capture the pawn last turn via enpassent, they no
+        // longer can.
+        if (secondLastMove != null) {
+            if (secondLastMove instanceof Pawn
+                    && Math.abs(secondLastMove.getTargetRow() - secondLastMove.getSourceRow()) == 2) {
+                // The last move was a double-move by an opponent's pawn
+                int targetRow = (secondLastMove.getPieceColor().equals("White")) ? secondLastMove.getRow() + 1
+                        : secondLastMove.getRow() - 1;
+                if (targetRow == newRow && secondLastMove.getTargetCol() == newCol) {
+                    ((Pawn) secondLastMove).setEnPassent(false);
+                }
+            }
+        }
+
+    }
 }

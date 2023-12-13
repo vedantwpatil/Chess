@@ -7,6 +7,10 @@ public class Piece extends JComponent {
     private String pieceType;
     private int row;
     private int col;
+    private int sourceRow;
+    private int sourceCol;
+    private int targetRow;
+    private int targetCol;
     private String pieceColor;
     private boolean isOccupied;
     private Icon pieceImage;
@@ -18,6 +22,15 @@ public class Piece extends JComponent {
         this.pieceColor = pieceColor;
         this.pieceImage = pieceImage;
         this.isOccupied = isOccupied;
+    }
+
+    public Piece(String pieceType, int sourceRow, int sourceCol, int targetRow, int targetCol, String pieceColor) {
+        this.pieceType = pieceType;
+        this.pieceColor = pieceColor;
+        this.sourceRow = sourceRow;
+        this.sourceCol = sourceCol;
+        this.targetRow = targetRow;
+        this.targetCol = targetCol;
     }
 
     // Same color pieces
@@ -299,6 +312,38 @@ public class Piece extends JComponent {
     public String toString() {
         return "Piece [pieceType=" + pieceType + ", row=" + row + ", col=" + col
                 + ", pieceColor=" + pieceColor + ", isOccupied=" + isOccupied + ", pieceImage=" + pieceImage + "]";
+    }
+
+    public int getSourceRow() {
+        return sourceRow;
+    }
+
+    public void setSourceRow(int sourceRow) {
+        this.sourceRow = sourceRow;
+    }
+
+    public int getSourceCol() {
+        return sourceCol;
+    }
+
+    public void setSourceCol(int sourceCol) {
+        this.sourceCol = sourceCol;
+    }
+
+    public int getTargetRow() {
+        return targetRow;
+    }
+
+    public void setTargetRow(int targetRow) {
+        this.targetRow = targetRow;
+    }
+
+    public int getTargetCol() {
+        return targetCol;
+    }
+
+    public void setTargetCol(int targetCol) {
+        this.targetCol = targetCol;
     }
 
 }
