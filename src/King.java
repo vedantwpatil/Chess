@@ -12,20 +12,23 @@ public class King extends Piece {
     }
 
     public boolean inCheck(Board board, Piece[][] chessBoard) {
+        boolean inCheck = false;
         switch (getPieceColor()) {
             case "White":
                 ArrayList<Piece> bPieces = board.getBlackPieces();
                 for (Piece piece : bPieces) {
-                    return piece.canMove(this.getRow(), this.getCol());
+                    if (piece.canMove(this.getRow(), this.getCol()))
+                        inCheck = true;
                 }
 
             case "Black":
                 ArrayList<Piece> wPieces = board.getWhitePieces();
                 for (Piece piece : wPieces) {
-                    return piece.canMove(this.getRow(), this.getCol());
+                    if (piece.canMove(this.getRow(), this.getCol()))
+                        inCheck = true;
                 }
         }
-        return false;
+        return inCheck;
     }
 
     // Does not implement if a piece can block

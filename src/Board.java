@@ -6,7 +6,7 @@ public class Board {
     private Piece[][] chessBoard;
     private ArrayList<Piece> whitePieces;
     private ArrayList<Piece> blackPieces;
-    private Stack<Piece> moves;
+    private Stack<Move> moves;
 
     // Pawn image
     ImageIcon wPawn = new ImageIcon(
@@ -61,7 +61,7 @@ public class Board {
         whitePieces.add(new Rook("Rook", 0, 7, "White", wRook, true));
 
         for (int col = 0; col < 8; col++) {
-            whitePieces.add(new Pawn("Pawn", 1, col, "White", wPawn, true, false));
+            whitePieces.add(new Pawn("Pawn", 1, col, "White", wPawn, true));
         }
 
         blackPieces = new ArrayList<>();
@@ -77,7 +77,7 @@ public class Board {
         blackPieces.add(new Rook("Rook", 7, 7, "Black", bRook, true));
 
         for (int col = 0; col < 8; col++) {
-            blackPieces.add(new Pawn("Pawn", 6, col, "Black", bPawn, true, false));
+            blackPieces.add(new Pawn("Pawn", 6, col, "Black", bPawn, true));
         }
 
         // Initialize the white pieces
@@ -91,7 +91,7 @@ public class Board {
         chessBoard[0][7] = new Rook("Rook", 0, 7, "White", wRook, true);
 
         for (int col = 0; col < 8; col++) {
-            chessBoard[1][col] = new Pawn("Pawn", 1, col, "White", wPawn, true, false);
+            chessBoard[1][col] = new Pawn("Pawn", 1, col, "White", wPawn, true);
         }
 
         // Initialize the black pieces
@@ -105,7 +105,7 @@ public class Board {
         chessBoard[7][7] = new Rook("Rook", 7, 7, "Black", bRook, true);
 
         for (int col = 0; col < 8; col++) {
-            chessBoard[6][col] = new Pawn("Pawn", 6, col, "Black", bPawn, true, false);
+            chessBoard[6][col] = new Pawn("Pawn", 6, col, "Black", bPawn, true);
         }
 
         // Initialize the empty squares
@@ -168,62 +168,25 @@ public class Board {
         this.blackPieces = blackPieces;
     }
 
-    public Stack<Piece> getMoves() {
+    public Stack<Move> getMoves() {
         return moves;
     }
 
-    public void setMoves(Stack<Piece> moves) {
+    public void setMoves(Stack<Move> moves) {
         this.moves = moves;
     }
 
-    public Piece getLastMove() {
-        if (moves.size() >= 1) {
-            return moves.get(moves.size() - 1);
+    public Move getLastMove() {
+        if (moves.size() > 0) {
+            return moves.peek();
         }
         return null;
     }
 
-    public Piece getSecondLastMove() {
-        if (moves.size() >= 2) {
-            return moves.get(moves.size() - 2);
-        }
-        return null;
-    }
-
-    public void addMove(Piece piece, int sourceRow, int sourceCol, int targetRow, int targetCol) {
+    public void addMove(Piece piece, int sourceRow, int sourceCol) {
         // Don't need image and occupied information so we make a new piece object to
         // add but we need where the piece moved from and the square its moving to
-        Piece movedPiece = new Piece(piece.getPieceType(), sourceRow, sourceCol, targetCol, targetCol,
-                piece.getPieceColor());
-        moves.add(movedPiece);
-    }
-
-    public void setEnPassantFlag(Board board, int newRow, int newCol) {
-        Piece lastMove = board.getLastMove();
-        Piece secondLastMove = board.getSecondLastMove();
-        if (lastMove != null) {
-            if (lastMove instanceof Pawn && Math.abs(lastMove.getTargetRow() - lastMove.getSourceRow()) == 2) {
-                // The last move was a double-move by an opponent's pawn
-                int targetRow = (lastMove.getPieceColor().equals("White")) ? lastMove.getRow() + 1
-                        : lastMove.getRow() - 1;
-                if (targetRow == newRow && lastMove.getTargetCol() == newCol) {
-                    ((Pawn) lastMove).setEnPassent(true);
-                }
-            }
-        }
-        // If the opponent didnt capture the pawn last turn via enpassent, they no
-        // longer can.
-        if (secondLastMove != null) {
-            if (secondLastMove instanceof Pawn
-                    && Math.abs(secondLastMove.getTargetRow() - secondLastMove.getSourceRow()) == 2) {
-                // The last move was a double-move by an opponent's pawn
-                int targetRow = (secondLastMove.getPieceColor().equals("White")) ? secondLastMove.getRow() + 1
-                        : secondLastMove.getRow() - 1;
-                if (targetRow == newRow && secondLastMove.getTargetCol() == newCol) {
-                    ((Pawn) secondLastMove).setEnPassent(false);
-                }
-            }
-        }
-
+        Move Piece = new Move(piece, sourceRow, sourceCol);
+        moves.add(Piece);
     }
 }
