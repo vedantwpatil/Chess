@@ -54,8 +54,8 @@ public class Board {
         whitePieces.add(new Rook("Rook", 0, 0, "White", wRook, true));
         whitePieces.add(new Knight("Knight", 0, 1, "White", wKnight, true));
         whitePieces.add(new Bishop("Bishop", 0, 2, "White", wBishop, true));
-        whitePieces.add(new Queen("Queen", 0, 3, "White", wQueen, true));
-        whitePieces.add(new King("King", 0, 4, "White", wKing, true));
+        whitePieces.add(new Queen("Queen", 0, 4, "White", wQueen, true));
+        whitePieces.add(new King("King", 0, 3, "White", wKing, true));
         whitePieces.add(new Bishop("Bishop", 0, 5, "White", wBishop, true));
         whitePieces.add(new Knight("Knight", 0, 6, "White", wKnight, true));
         whitePieces.add(new Rook("Rook", 0, 7, "White", wRook, true));
@@ -70,8 +70,8 @@ public class Board {
         blackPieces.add(new Rook("Rook", 7, 0, "Black", bRook, true));
         blackPieces.add(new Knight("Knight", 7, 1, "Black", bKnight, true));
         blackPieces.add(new Bishop("Bishop", 7, 2, "Black", bBishop, true));
-        blackPieces.add(new Queen("Queen", 7, 3, "Black", bQueen, true));
-        blackPieces.add(new King("King", 7, 4, "Black", bKing, true));
+        blackPieces.add(new Queen("Queen", 7, 4, "Black", bQueen, true));
+        blackPieces.add(new King("King", 7, 3, "Black", bKing, true));
         blackPieces.add(new Bishop("Bishop", 7, 5, "Black", bBishop, true));
         blackPieces.add(new Knight("Knight", 7, 6, "Black", bKnight, true));
         blackPieces.add(new Rook("Rook", 7, 7, "Black", bRook, true));
@@ -84,8 +84,8 @@ public class Board {
         chessBoard[0][0] = new Rook("Rook", 0, 0, "White", wRook, true);
         chessBoard[0][1] = new Knight("Knight", 0, 1, "White", wKnight, true);
         chessBoard[0][2] = new Bishop("Bishop", 0, 2, "White", wBishop, true);
-        chessBoard[0][3] = new Queen("Queen", 0, 3, "White", wQueen, true);
-        chessBoard[0][4] = new King("King", 0, 4, "White", wKing, true);
+        chessBoard[0][3] = new King("King", 0, 3, "White", wKing, true);
+        chessBoard[0][4] = new Queen("Queen", 0, 4, "White", wQueen, true);
         chessBoard[0][5] = new Bishop("Bishop", 0, 5, "White", wBishop, true);
         chessBoard[0][6] = new Knight("Knight", 0, 6, "White", wKnight, true);
         chessBoard[0][7] = new Rook("Rook", 0, 7, "White", wRook, true);
@@ -98,8 +98,8 @@ public class Board {
         chessBoard[7][0] = new Rook("Rook", 7, 0, "Black", bRook, true);
         chessBoard[7][1] = new Knight("Knight", 7, 1, "Black", bKnight, true);
         chessBoard[7][2] = new Bishop("Bishop", 7, 2, "Black", bBishop, true);
-        chessBoard[7][3] = new Queen("Queen", 7, 3, "Black", bQueen, true);
-        chessBoard[7][4] = new King("King", 7, 4, "Black", bKing, true);
+        chessBoard[7][3] = new King("King", 0, 3, "Black", bKing, true);
+        chessBoard[7][4] = new Queen("Queen", 0, 4, "Black", bQueen, true);
         chessBoard[7][5] = new Bishop("Bishop", 7, 5, "Black", bBishop, true);
         chessBoard[7][6] = new Knight("Knight", 7, 6, "Black", bKnight, true);
         chessBoard[7][7] = new Rook("Rook", 7, 7, "Black", bRook, true);
@@ -124,6 +124,15 @@ public class Board {
         return null;
     }
 
+    public ArrayList<Piece> getAttackingSquares(Board board, Piece[][] currentChessBoard, ArrayList<Piece> pieces) {
+        ArrayList<Piece> possibleMoves = new ArrayList<Piece>();
+
+        for (Piece piece : pieces) {
+            possibleMoves.addAll(piece.getPossibleMoves(board, currentChessBoard));
+        }
+        return possibleMoves;
+    }
+
     public ArrayList<Piece> getWhiteAttackingSquares(Board board, Piece[][] currentChessBoard) {
         ArrayList<Piece> wPieces = getWhitePieces();
         ArrayList<Piece> possibleMoves = new ArrayList<Piece>();
@@ -142,6 +151,24 @@ public class Board {
             possibleMoves.addAll(piece.getPossibleMoves(board, currentChessBoard));
         }
         return possibleMoves;
+    }
+
+    public ArrayList<Piece> getSquaresBetween(int startRow, int startCol, int endRow, int endCol) {
+        ArrayList<Piece> squares = new ArrayList<>();
+
+        // Determine direction of movement
+        int rowDirection = Integer.compare(endRow, startRow);
+        int colDirection = Integer.compare(endCol, startCol);
+
+        // Iterate through squares between start and end positions
+        for (int row = startRow + rowDirection, col = startCol + colDirection; row != endRow
+                || col != endCol; row += rowDirection, col += colDirection) {
+
+            // Add the piece at the current square to the list
+            squares.add(chessBoard[row][col]);
+        }
+
+        return squares;
     }
 
     public Piece[][] getChessBoard() {
@@ -183,10 +210,64 @@ public class Board {
         return null;
     }
 
+    /**
+     * @param squares
+     * @param newRow
+     * @param newCol
+     * @return
+     *         Checks if a move is in an arraylist
+     */
+    public boolean findMove(ArrayList<Piece> squares, int newRow, int newCol) {
+        for (Piece square : squares) {
+            if (square.getRow() == newRow && square.getCol() == newCol) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void addMove(Piece piece, int sourceRow, int sourceCol) {
         // Don't need image and occupied information so we make a new piece object to
-        // add but we need where the piece moved from and the square its moving to
+        // add but we need where the piece moved from and the square its moving to, the
+        // Piece object will hold the current row col and the other ints will hold the
+        // original row col
         Move Piece = new Move(piece, sourceRow, sourceCol);
         moves.add(Piece);
+    }
+
+    public ArrayList<Piece> getOpponentPieces(Piece piece) {
+        // TODO Auto-generated method stub
+        switch (piece.getPieceColor()) {
+            case "White":
+                return getBlackPieces();
+
+            case "Black":
+                return getWhitePieces();
+        }
+        return null;
+    }
+
+    public ArrayList<Piece> getSameColorPieces(Piece piece) {
+        // TODO Auto-generated method stub
+        switch (piece.getPieceColor()) {
+            case "White":
+                return getWhitePieces();
+
+            case "Black":
+                return getWhitePieces();
+        }
+        return null;
+    }
+
+    public ArrayList<Piece> getPiecesByColor(String opponentColor) {
+        // TODO Auto-generated method stub
+        switch (opponentColor) {
+            case "White":
+                return getWhitePieces();
+
+            case "Black":
+                return getBlackPieces();
+        }
+        return null;
     }
 }

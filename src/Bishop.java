@@ -13,8 +13,8 @@ public class Bishop extends Piece {
                 || (!(this.getPieceColor().equals(chessBoard[newRow][newCol].getPieceColor())))) {
             // Calculate the row and column differences between the current and target
             // positions
-            int rowDiff = Math.abs(newRow - this.getRow());
-            int colDiff = Math.abs(newCol - this.getCol());
+            int rowDiff = Math.abs(newRow - getRow());
+            int colDiff = Math.abs(newCol - getCol());
 
             // A bishop can move diagonally. Therefore, it must move an equal number of
             // squares

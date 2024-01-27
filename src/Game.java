@@ -343,6 +343,32 @@ public class Game {
             Color canMoveToSquare = new Color(255, 137, 115);
             Color selectedSquare = new Color(255, 234, 181);
 
+            // Check for checkmate
+            ArrayList<Piece> wPieces = board.getWhitePieces();
+            ArrayList<Piece> bPieces = board.getBlackPieces();
+
+            if (whiteTurn) {
+                for (Piece piece : wPieces) {
+                    if (piece instanceof King) {
+                        King tempKing = (King) piece;
+                        if (tempKing.isCheckmate(board, chessBoard)) {
+                            endGame("Black");
+                        }
+                    }
+                }
+            }
+
+            if (blackTurn) {
+                for (Piece piece : bPieces) {
+                    if (piece instanceof King) {
+                        King tempKing = (King) piece;
+                        if (tempKing.isCheckmate(board, chessBoard)) {
+                            endGame("White");
+                        }
+                    }
+                }
+            }
+
             // Check if the button clicked is the source button
             if (buttonClicked == sourceButton) {
                 // Reset the source button
@@ -429,26 +455,7 @@ public class Game {
 
             if (sourceButton == null)
                 resetBoardColors();
-            ArrayList<Piece> wPieces = board.getWhitePieces();
-            ArrayList<Piece> bPieces = board.getBlackPieces();
 
-            for (Piece piece : wPieces) {
-                if (piece instanceof King) {
-                    King tempKing = (King) piece;
-                    if (tempKing.isCheckmate(board, chessBoard)) {
-                        System.out.println("Game Over \nBlack Wins");
-                    }
-                }
-            }
-
-            for (Piece piece : bPieces) {
-                if (piece instanceof King) {
-                    King tempKing = (King) piece;
-                    if (tempKing.isCheckmate(board, chessBoard)) {
-                        System.out.println("Game Over \nWhite Wins");
-                    }
-                }
-            }
             frame.repaint();
         }
 
@@ -627,7 +634,8 @@ public class Game {
             // Update the chessBoard arrayList
 
             // Add the new piece
-            Piece newLocPiece = new Piece(testPawn.getPieceType(), targetRow, targetCol, pieceColor, testPawn.getPieceImage(), true);
+            Piece newLocPiece = new Piece(testPawn.getPieceType(), targetRow, targetCol, pieceColor,
+                    testPawn.getPieceImage(), true);
 
             if (pieceColor.equals("White")) {
                 board.findPiece(wPieces, sourceRow, sourceCol).setRow(targetRow);
@@ -665,17 +673,6 @@ public class Game {
 
             // Reset the background color of all squares
             resetButtonColors(sourceButton);
-
-            // for (Piece piece : wPieces) {
-            // if (piece instanceof Pawn) {
-            // System.out.println(((Pawn) piece).isEnPassent());
-            // }
-            // }
-            // for (Piece piece : bPieces) {
-            // if (piece instanceof Pawn) {
-            // System.out.println(((Pawn) piece).isEnPassent());
-            // }
-            // }
 
             // Update the turn
             whiteTurn = !whiteTurn;
@@ -752,17 +749,6 @@ public class Game {
             // Reset the background color of all squares
             resetButtonColors(sourceButton);
 
-            // for (Piece piece : wPieces) {
-            // if (piece instanceof Pawn) {
-            // System.out.println(((Pawn) piece).isEnPassent());
-            // }
-            // }
-            // for (Piece piece : bPieces) {
-            // if (piece instanceof Pawn) {
-            // System.out.println(((Pawn) piece).isEnPassent());
-            // }
-            // }
-
             // Update the turn
             whiteTurn = !whiteTurn;
             blackTurn = !blackTurn;
@@ -786,6 +772,22 @@ public class Game {
                 }
             }
         }
+
+        private void endGame(String winner) {
+            String message = "Game Over!\n" + winner + " Wins";
+            int option = JOptionPane.showOptionDialog(frame, message, "Game Over", JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE, null, new Object[] { "New Game", "Exit" }, "New Game");
+
+            if (option == 0) {
+                // Start a new game
+                frame.dispose();
+                new Game();
+            } else {
+                // Exit the program
+                frame.dispose();
+            }
+        }
+
     }
 
     public static void main(String[] args) {

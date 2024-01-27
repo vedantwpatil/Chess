@@ -12,50 +12,204 @@ public class King extends Piece {
     }
 
     public boolean inCheck(Board board, Piece[][] chessBoard) {
-        boolean inCheck = false;
-        switch (getPieceColor()) {
-            case "White":
-                ArrayList<Piece> bPieces = board.getBlackPieces();
-                for (Piece piece : bPieces) {
-                    if (piece.canMove(this.getRow(), this.getCol()))
-                        inCheck = true;
-                }
+        String opponentColor = getOpponentColor();
+        ArrayList<Piece> opponentPieces = board.getPiecesByColor(opponentColor);
+        Boolean inCheck = false;
+        for (Piece piece : opponentPieces) {
+            String pieceType = piece.getPieceType();
+            switch (pieceType) {
+                case "Pawn":
 
-            case "Black":
-                ArrayList<Piece> wPieces = board.getWhitePieces();
-                for (Piece piece : wPieces) {
-                    if (piece.canMove(this.getRow(), this.getCol()))
-                        inCheck = true;
-                }
+                    Pawn tempPawn = new Pawn(pieceType, piece.getRow(), piece.getCol(),
+                            piece.getPieceColor(),
+                            (ImageIcon) piece.getPieceImage(), false);
+                    inCheck = tempPawn.canMove(board, chessBoard, this.getRow(), this.getCol());
+                    if (inCheck)
+                        return inCheck;
+                    break;
+                case "Knight":
+                    Knight tempKnight = new Knight(pieceType, piece.getRow(),
+                            piece.getCol(), piece.getPieceColor(),
+                            (ImageIcon) piece.getPieceImage(), false);
+                    inCheck = tempKnight.canMove(board, chessBoard, this.getRow(), this.getCol());
+                    if (inCheck)
+                        return inCheck;
+                    break;
+                case "Bishop":
+                    Bishop tempBishop = new Bishop(pieceType, piece.getRow(), piece.getCol(),
+                            piece.getPieceColor(), (ImageIcon) piece.getPieceImage(), false);
+                    inCheck = tempBishop.canMove(board, chessBoard, this.getRow(), this.getCol());
+                    if (inCheck)
+                        return inCheck;
+                    break;
+                case "Rook":
+                    Rook tempRook = new Rook(pieceType, piece.getRow(), piece.getCol(),
+                            piece.getPieceColor(),
+                            (ImageIcon) piece.getPieceImage(), false);
+                    inCheck = tempRook.canMove(board, chessBoard, this.getRow(), this.getCol());
+                    if (inCheck)
+                        return inCheck;
+                    break;
+                case "Queen":
+                    Queen tempQueen = new Queen(pieceType, piece.getRow(), piece.getCol(),
+                            piece.getPieceColor(), (ImageIcon) piece.getPieceImage(), false);
+                    inCheck = tempQueen.canMove(board, chessBoard, this.getRow(), this.getCol());
+                    if (inCheck)
+                        return inCheck;
+                    break;
+                case "King":
+                    King tempKing = new King(pieceType, piece.getRow(), piece.getCol(),
+                            piece.getPieceColor(),
+                            (ImageIcon) piece.getPieceImage(), false);
+                    inCheck = tempKing.canMove(board, chessBoard, this.getRow(), this.getCol());
+                    if (inCheck)
+                        return inCheck;
+                    break;
+            }
         }
+
         return inCheck;
     }
 
     // Does not implement if a piece can block
     public boolean isCheckmate(Board board, Piece[][] chessBoard) {
         if (inCheck(board, chessBoard)) {
-            for (int i = 0; i < chessBoard.length; i++) {
-                for (int j = 0; j < chessBoard[0].length; j++) {
-                    if (canMove(i, j)) {
-                        return true;
+            // King is in check
+
+            // Check if the king can escape check by moving to an empty square
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    int newRow = this.getRow() + i;
+                    int newCol = this.getCol() + j;
+
+                    if (isValidMove(newRow, newCol) && canMove(board, chessBoard, newRow, newCol)) {
+                        return false; // King can escape check
                     }
                 }
             }
+
+            // Check if any piece can block the check
+            Move lastMove = board.getLastMove();
+            Piece checkingPiece = lastMove.getPiece();
+
+            // Check if checking piece can be blocked
+            Boolean isCheckMate = false;
+            if (checkingPiece instanceof Bishop || checkingPiece instanceof Rook || checkingPiece instanceof Queen) {
+                int kingRow = getRow();
+                int kingCol = getCol();
+                int checkingRow = checkingPiece.getRow();
+                int checkingCol = checkingPiece.getCol();
+
+                // Get squares between the king and checking piece
+                ArrayList<Piece> betweenSquares = board.getSquaresBetween(checkingRow, checkingCol, kingRow, kingCol);
+
+                // Check for pieces of the same color that can move to those squares
+                for (Piece piece : board.getSameColorPieces(this)) {
+                    for (Piece square : betweenSquares) {
+                        int squareRow = square.getRow();
+                        int squareCol = square.getCol();
+                        String pieceType = piece.getPieceType();
+
+                        switch (pieceType) {
+                            case "Pawn":
+
+                                Pawn tempPawn = new Pawn(pieceType, piece.getRow(), piece.getCol(),
+                                        piece.getPieceColor(),
+                                        (ImageIcon) piece.getPieceImage(), false);
+                                isCheckMate = !tempPawn.canMove(board, chessBoard, squareRow, squareCol);
+                                break;
+                            case "Knight":
+                                Knight tempKnight = new Knight(pieceType, piece.getRow(),
+                                        piece.getCol(), piece.getPieceColor(),
+                                        (ImageIcon) piece.getPieceImage(), false);
+                                isCheckMate = !tempKnight.canMove(board, chessBoard, squareRow, squareCol);
+                                if (isCheckMate)
+                                    return isCheckMate;
+                                break;
+                            case "Bishop":
+                                Bishop tempBishop = new Bishop(pieceType, piece.getRow(), piece.getCol(),
+                                        piece.getPieceColor(), (ImageIcon) piece.getPieceImage(), false);
+                                isCheckMate = !tempBishop.canMove(board, chessBoard, squareRow, squareCol);
+                                break;
+                            case "Rook":
+                                Rook tempRook = new Rook(pieceType, piece.getRow(), piece.getCol(),
+                                        piece.getPieceColor(),
+                                        (ImageIcon) piece.getPieceImage(), false);
+                                isCheckMate = !tempRook.canMove(board, chessBoard, squareRow, squareCol);
+                                break;
+                            case "Queen":
+                                Queen tempQueen = new Queen(pieceType, piece.getRow(), piece.getCol(),
+                                        piece.getPieceColor(), (ImageIcon) piece.getPieceImage(), false);
+                                isCheckMate = !tempQueen.canMove(board, chessBoard, squareRow, squareCol);
+                                break;
+                            case "King":
+                                break;
+                        }
+                    }
+                }
+            }
+
+            // Check if any piece can capture the attacking piece
+            if (isCheckMate) {
+                ArrayList<Piece> attackingPieces = getAttackingPieces(board, chessBoard);
+                for (Piece attackingPiece : attackingPieces) {
+                    for (Piece piece : board.getSameColorPieces(this)) {
+                        if (piece.canMove(board, chessBoard, attackingPiece.getRow(), attackingPiece.getCol())) {
+                            // If a piece can capture the attacking piece, it's not checkmate
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // If none of the conditions are met, it's checkmate
+            return true;
         }
+
+        // If the king is not in check, it's not checkmate
         return false;
+    }
+
+    // Helper method to get pieces attacking the king
+    private ArrayList<Piece> getAttackingPieces(Board board, Piece[][] chessBoard) {
+        ArrayList<Piece> attackingPieces = new ArrayList<>();
+
+        for (Piece piece : board.getOpponentPieces(this)) {
+            if (piece.canMove(board, chessBoard, this.getRow(), this.getCol())) {
+                attackingPieces.add(piece);
+            }
+        }
+
+        return attackingPieces;
+    }
+
+    // Helper method to check if the move is within the board boundaries
+    private boolean isValidMove(int newRow, int newCol) {
+        return newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8;
     }
 
     @Override
     public boolean canMove(Board board, Piece[][] chessBoard, int newRow, int newCol) {
+        boolean canMove = false;
         if (!(isSquareOcupied(newRow, newCol, board, chessBoard))
                 || (!(this.getPieceColor().equals(chessBoard[newRow][newCol].getPieceColor())))) {
-            int rowDiff = Math.abs(newRow - this.getRow());
-            int colDiff = Math.abs(newCol - this.getCol());
+            int rowDiff = Math.abs(newRow - getRow());
+            int colDiff = Math.abs(newCol - getCol());
 
             // Kings can move one square in any direction.
-            return (rowDiff <= 1 && colDiff <= 1);
+            Boolean move = rowDiff <= 1 && colDiff <= 1;
+
+            // Check if the move puts the king in check
+            if (move) {
+                ArrayList<Piece> opponentPieces = board.getOpponentPieces(this);
+                for (Piece opponentPiece : opponentPieces) {
+                    canMove = !opponentPiece.canMove(board, chessBoard, getRow(), getCol());
+                    if (!canMove)
+                        return canMove;
+                }
+            }
         }
-        return false;
+        return canMove;
     }
 
     @Override
