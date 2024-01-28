@@ -12,8 +12,8 @@ public class Knight extends Piece {
     public boolean canMove(Board board, Piece[][] chessBoard, int newRow, int newCol) {
         if (!(isSquareOcupied(newRow, newCol, board, chessBoard))
                 || (!(this.getPieceColor().equals(chessBoard[newRow][newCol].getPieceColor())))) {
-            int rowDiff = Math.abs(newRow - this.getRow());
-            int colDiff = Math.abs(newCol - this.getCol());
+            int rowDiff = Math.abs(newRow - getRow());
+            int colDiff = Math.abs(newCol - getCol());
 
             // Knights move in an L-shape: two squares in one direction and one square
             // perpendicular.

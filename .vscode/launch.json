@@ -9,6 +9,13 @@
             "name": "ChessBoard",
             "request": "launch",
             "mainClass": "ChessBoard",
+            "projectName": "Chess_6680969e"
+        },
+        {
+            "type": "java",
+            "name": "ChessBoard",
+            "request": "launch",
+            "mainClass": "ChessBoard",
             "projectName": "Chess_df9cd2d1"
         },
         {

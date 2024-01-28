@@ -11,11 +11,11 @@ public class Queen extends Piece {
     public boolean canMove(Board board, Piece[][] chessBoard, int newRow, int newCol) {
         if (!(isSquareOcupied(newRow, newCol, board, chessBoard))
                 || (!(this.getPieceColor().equals(chessBoard[newRow][newCol].getPieceColor())))) {
-            int rowDiff = Math.abs(newRow - this.getRow());
-            int colDiff = Math.abs(newCol - this.getCol());
+            int rowDiff = Math.abs(newRow - getRow());
+            int colDiff = Math.abs(newCol - getCol());
 
             // Queens can move horizontally, vertically, or diagonally.
-            return newRow == this.getRow() || newCol == this.getCol() || rowDiff == colDiff;
+            return newRow == getRow() || newCol == getCol() || rowDiff == colDiff;
         }
         return false;
     }

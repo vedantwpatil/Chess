@@ -332,32 +332,62 @@ public class Game {
             Color canMoveToSquare = new Color(255, 137, 115);
             Color selectedSquare = new Color(255, 234, 181);
 
-            // Check if the button clicked is the source button
-            if (buttonClicked == sourceButton) {
-                // Reset the source button
-                sourceButton = null;
-            } else if (sourceButton == null && ((buttonClicked.getPieceColor().equals("White") && whiteTurn)
-                    || (buttonClicked.getPieceColor().equals("Black") && blackTurn))) {
-                // Set the source button
-                sourceButton = buttonClicked;
-            } else if (buttonClicked.getPieceColor() == sourceButton.getPieceColor()) {
-                // If you click another piece of the same color, that is now the new source
-                // piece
-                resetBoardColors();
-                sourceButton = buttonClicked;
-                targetButton = null;
-            } else if (buttonClicked.getBackground().equals(canMoveToSquare) && sourceButton != null) {
-                // The source button is already set, so the button clicked must be the target
-                // button
-                targetButton = buttonClicked;
+            // Check for checkmate
+            ArrayList<Piece> wPieces = board.getWhitePieces();
+            ArrayList<Piece> bPieces = board.getBlackPieces();
 
-                // Call the movePiece method passing the source and target buttons as arguments
-                movePiece(board, sourceButton, buttonClicked, canMoveToSquare);
-                // Reset the source and target buttons
-                sourceButton = null;
-                targetButton = null;
+            if (whiteTurn) {
+                for (Piece piece : wPieces) {
+                    if (piece instanceof King) {
+                        King tempKing = (King) piece;
+                        if (tempKing.isCheckmate(board, chessBoard)) {
+                            endGame("Black");
+                        }
+                    }
+                }
             }
 
+            if (blackTurn) {
+                for (Piece piece : bPieces) {
+                    if (piece instanceof King) {
+                        King tempKing = (King) piece;
+                        if (tempKing.isCheckmate(board, chessBoard)) {
+                            endGame("White");
+                        }
+                    }
+                }
+            }
+
+            // Check if the button clicked is the source button
+            try {
+                if (buttonClicked == sourceButton) {
+                    // Reset the source button
+                    sourceButton = null;
+                } else if (sourceButton == null && ((buttonClicked.getPieceColor().equals("White") && whiteTurn)
+                        || (buttonClicked.getPieceColor().equals("Black") && blackTurn))) {
+                    // Set the source button
+                    sourceButton = buttonClicked;
+                } else if (buttonClicked.getPieceColor() == sourceButton.getPieceColor()) {
+                    // If you click another piece of the same color, that is now the new source
+                    // piece
+                    resetBoardColors();
+                    sourceButton = buttonClicked;
+                    targetButton = null;
+                } else if (buttonClicked.getBackground().equals(canMoveToSquare) && sourceButton != null) {
+                    // The source button is already set, so the button clicked must be the target
+                    // button
+                    targetButton = buttonClicked;
+    
+                    // Call the movePiece method passing the source and target buttons as arguments
+                    movePiece(board, sourceButton, buttonClicked, canMoveToSquare);
+                    // Reset the source and target buttons
+                    sourceButton = null;
+                    targetButton = null;
+                }
+            } catch (Exception nullPointerException) {
+                // TODO: handle exception
+            }
+            
             // Highlights selected piece/square
 
             highlightSelectedSquare(buttonClicked, selectedSquare, lightSquare, darkSquare);
@@ -369,9 +399,10 @@ public class Game {
                 String pieceType = buttonClicked.getPieceType();
                 switch (pieceType) {
                     case "Pawn":
+
                         Pawn tempPawn = new Pawn(pieceType, buttonClicked.getRow(), buttonClicked.getCol(),
                                 buttonClicked.getPieceColor(),
-                                buttonClicked.getPieceImage(), false, false);
+                                buttonClicked.getPieceImage(), false);
                         highlightValidMoves(tempPawn, buttonClicked, canMoveToSquare);
                         break;
                     case "Knight":
@@ -409,26 +440,7 @@ public class Game {
 
             if (sourceButton == null)
                 resetBoardColors();
-            ArrayList<Piece> wPieces = board.getWhitePieces();
-            ArrayList<Piece> bPieces = board.getBlackPieces();
 
-            for (Piece piece : wPieces) {
-                if (piece instanceof King) {
-                    King tempKing = (King) piece;
-                    if (tempKing.isCheckmate(board, chessBoard)) {
-                        System.out.println("Game Over ");
-                    }
-                }
-            }
-
-            for (Piece piece : bPieces) {
-                if (piece instanceof King) {
-                    King tempKing = (King) piece;
-                    if (tempKing.isCheckmate(board, chessBoard)) {
-                        System.out.println("Game Over ");
-                    }
-                }
-            }
             frame.repaint();
         }
 
@@ -458,51 +470,32 @@ public class Game {
 
             // Enpassant
             if (piece instanceof Pawn) {
-                Pawn testPawn = (Pawn) piece;
-                ArrayList<Piece> wPieces = board.getWhitePieces();
-                ArrayList<Piece> bPieces = board.getBlackPieces();
+                if (board.getLastMove() != null) {
+                    Pawn testPawn = (Pawn) piece;
+                    Move lastMove = board.getLastMove();
+                    int colDiff = Math.abs(testPawn.getCol() - lastMove.getCurrentCol());
 
-                if (testPawn.getPieceColor().equals("Black")) {
-                    for (Piece pawn : wPieces) {
-                        if (pawn instanceof Pawn) {
-                            if (pawn.getRow() == 3 && Math.abs(pawn.getCol() - piece.getCol()) == 1) {
-                                Piece move = new Piece("Pawn", pawn.getRow(), pawn.getCol() + 1, "White",
-                                        pawn.getPieceImage(), true);
-                                possibleMoves.add(move);
-                            }
-                            // Enpassent
-                            int colDiff = Math.abs(testPawn.getCol() - pawn.getCol());
-                            int row = pawn.getRow();
-                            int col = pawn.getCol();
-
-                            if (colDiff == 1 && row == testPawn.getRow() && chessBoard[row][col] instanceof Pawn
-                                    && ((Pawn) chessBoard[row][col]).isEnPassent()) {
-                                Piece move = new Piece("Pawn", pawn.getRow(), pawn.getCol() - 1, "White",
-                                        pawn.getPieceImage(), true);
-                                possibleMoves.add(move);
-                            }
+                    // White Pawn
+                    if (piece.getPieceColor().equals("White")) {
+                        if (lastMove.getPiece().getPieceType().equals("Pawn")
+                                && Math.abs(lastMove.getPastRow() - lastMove.getCurrentRow()) == 2
+                                && (colDiff == 1 && testPawn.getRow() == lastMove.getCurrentRow())) {
+                            Piece move = new Piece(testPawn.getPieceType(), lastMove.getCurrentRow() + 1,
+                                    lastMove.getCurrentCol(), testPawn.getPieceColor(), testPawn.getPieceImage(),
+                                    false);
+                            possibleMoves.add(move);
                         }
                     }
-                }
-                if (testPawn.getPieceColor().equals("White")) {
-                    for (Piece pawn : bPieces) {
-                        if (pawn instanceof Pawn) {
-                            if (pawn.getRow() == 4 && Math.abs(pawn.getCol() - piece.getCol()) == 1) {
-                                Piece move = new Piece("Pawn", pawn.getRow(), pawn.getCol() - 1, "White",
-                                        pawn.getPieceImage(), true);
-                                possibleMoves.add(move);
-                            }
-                            int colDiff = Math.abs(testPawn.getCol() - pawn.getCol());
-                            int row = pawn.getRow();
-                            int col = pawn.getCol();
 
-                            // Enpassent
-                            if (colDiff == 1 && row == testPawn.getRow() && chessBoard[row][col] instanceof Pawn
-                                    && ((Pawn) chessBoard[row][col]).isEnPassent()) {
-                                Piece move = new Piece("Pawn", pawn.getRow(), pawn.getCol() - 1, "White",
-                                        pawn.getPieceImage(), true);
-                                possibleMoves.add(move);
-                            }
+                    // Black Pawn
+                    if (piece.getPieceColor().equals("Black")) {
+                        if (lastMove.getPiece().getPieceType().equals("Pawn")
+                                && Math.abs(lastMove.getPastRow() - lastMove.getCurrentRow()) == 2
+                                && (colDiff == 1 && testPawn.getRow() == lastMove.getCurrentRow())) {
+                            Piece move = new Piece(testPawn.getPieceType(), lastMove.getCurrentRow() - 1,
+                                    lastMove.getCurrentCol(), testPawn.getPieceColor(), testPawn.getPieceImage(),
+                                    false);
+                            possibleMoves.add(move);
                         }
                     }
                 }
@@ -564,15 +557,18 @@ public class Game {
                     movePieceLogic(board, rookSourceButtonKSide, rookTargetButtonKSide);
                 }
             }
-
+            // Promotion logic
+            if (sourceButton.getPieceType().equals("Pawn")
+                    && (targetButton.getRow() == 7 || targetButton.getRow() == 0)) {
+                movePiecePromotionLogic(board, sourceButton, targetButton);
+            }
             // Normal move
             else {
                 movePieceLogic(board, sourceButton, targetButton);
             }
         }
 
-        public void movePieceLogic(Board board, PieceButton sourceButton, PieceButton targetButton) {
-
+        public void movePiecePromotionLogic(Board board, PieceButton sourceButton, PieceButton targetButton) {
             // Board is somehow null
             ArrayList<Piece> wPieces = board.getWhitePieces();
             ArrayList<Piece> bPieces = board.getBlackPieces();
@@ -580,7 +576,6 @@ public class Game {
             // Get the chess piece information from the source button
             String pieceType = sourceButton.getPieceType();
             String pieceColor = sourceButton.getPieceColor();
-            Icon pieceImage = sourceButton.getIcon();
 
             // Get coordinates
             int targetRow = targetButton.getRow();
@@ -588,10 +583,14 @@ public class Game {
             int sourceRow = sourceButton.getRow();
             int sourceCol = sourceButton.getCol();
 
+            // Promotes the pawn
+            Pawn testPawn = new Pawn(pieceType, targetRow, targetCol, pieceColor, sourceButton.getPieceImage(), true);
+            testPawn.promote();
+
             // Update the target button with the piece information
-            targetButton.setPieceType(pieceType);
+            targetButton.setPieceType(testPawn.getPieceType());
             targetButton.setPieceColor(pieceColor);
-            targetButton.setIcon(pieceImage);
+            targetButton.setIcon(testPawn.getPieceImage());
 
             // Update the chessBoard array
             chessBoard[targetRow][targetCol] = chessBoard[sourceRow][sourceCol];
@@ -599,15 +598,11 @@ public class Game {
             chessBoard[targetRow][targetCol].setCol(targetCol);
             chessBoard[targetRow][targetCol].setOccupied(true);
 
-            System.out.println("\nDefault\n");
-            for (int i = 0; i < buttonList[0].length; i++) {
-                for (int j = 0; j < buttonList.length; j++) {
-                    System.out.println(chessBoard[i][j]);
-                }
-            }
             // Update the chessBoard arrayList
 
-            Piece newLocPiece = new Piece(pieceType, targetRow, targetCol, pieceColor, pieceImage, true);
+            // Add the new piece
+            Piece newLocPiece = new Piece(testPawn.getPieceType(), targetRow, targetCol, pieceColor,
+                    testPawn.getPieceImage(), true);
 
             if (pieceColor.equals("White")) {
                 board.findPiece(wPieces, sourceRow, sourceCol).setRow(targetRow);
@@ -619,6 +614,23 @@ public class Game {
             }
 
             chessBoard[targetRow][targetCol].setPieceObject(newLocPiece);
+
+            // If there was a capture, remove the old piece
+            if (pieceColor.equals("White"))
+                if (board.findPiece(bPieces, targetRow, targetCol) != null)
+                    bPieces.remove(board.findPiece(bPieces, sourceRow, sourceCol));
+            if (pieceColor.equals("Black"))
+                if (board.findPiece(wPieces, targetRow, targetCol) != null)
+                    wPieces.remove(board.findPiece(wPieces, sourceRow, sourceCol));
+
+            // Update the arrayLists
+            board.setWhitePieces(wPieces);
+            board.setBlackPieces(bPieces);
+
+            // Update move history
+            board.addMove(newLocPiece, sourceRow, sourceCol,
+                    new Piece(targetButton.getPieceType(), targetButton.getRow(), targetButton.getCol(),
+                            targetButton.getPieceColor(), targetButton.getPieceImage(), targetButton.isOccupied()));
 
             // Clear the source button
             sourceButton.setPieceType(null);
@@ -634,12 +646,92 @@ public class Game {
             // Update the turn
             whiteTurn = !whiteTurn;
             blackTurn = !blackTurn;
-            System.out.println("\nMoved\n");
-            for (int i = 0; i < buttonList[0].length; i++) {
-                for (int j = 0; j < buttonList.length; j++) {
-                    System.out.println(chessBoard[i][j]);
-                }
+        }
+
+        public void movePieceLogic(Board board, PieceButton sourceButton, PieceButton targetButton) {
+
+            ArrayList<Piece> wPieces = board.getWhitePieces();
+            ArrayList<Piece> bPieces = board.getBlackPieces();
+
+            // Get the chess piece information from the source button
+            String pieceType = sourceButton.getPieceType();
+            String pieceColor = sourceButton.getPieceColor();
+            Icon pieceImage = sourceButton.getIcon();
+
+            // Get coordinates
+            int targetRow = targetButton.getRow();
+            int targetCol = targetButton.getCol();
+            int sourceRow = sourceButton.getRow();
+            int sourceCol = sourceButton.getCol();
+
+            // Check for en passant capture
+            if (pieceType.equals("Pawn") && sourceCol != targetCol && targetButton.getPieceType() == null) {
+                // En passant capture: remove the captured pawn's image
+                int capturedPawnRow = sourceRow;
+                int capturedPawnCol = targetCol;
+
+                // Remove the icon from the corresponding PieceButton
+                ((PieceButton) (buttonList[capturedPawnRow][capturedPawnCol])).setIcon(null);
             }
+
+            // Update the target button with the piece information
+            targetButton.setPieceType(pieceType);
+            targetButton.setPieceColor(pieceColor);
+            targetButton.setIcon(pieceImage);
+
+            // Update the chessBoard array
+            chessBoard[targetRow][targetCol] = chessBoard[sourceRow][sourceCol];
+            chessBoard[targetRow][targetCol].setRow(targetRow);
+            chessBoard[targetRow][targetCol].setCol(targetCol);
+            chessBoard[targetRow][targetCol].setOccupied(true);
+
+            // Update the chessBoard arrayList
+
+            // Add the new piece
+            Piece newLocPiece = new Piece(pieceType, targetRow, targetCol, pieceColor, pieceImage, true);
+
+            if (pieceColor.equals("White")) {
+                board.findPiece(wPieces, sourceRow, sourceCol).setRow(targetRow);
+                board.findPiece(wPieces, targetRow, sourceCol).setCol(targetCol);
+            }
+            if (pieceColor.equals("Black")) {
+                board.findPiece(bPieces, sourceRow, sourceCol).setRow(targetRow);
+                board.findPiece(bPieces, targetRow, sourceCol).setCol(targetCol);
+            }
+
+            chessBoard[targetRow][targetCol].setPieceObject(newLocPiece);
+
+            // If there was a capture, remove the old piece
+            if (pieceColor.equals("White"))
+                if (board.findPiece(bPieces, targetRow, targetCol) != null)
+                    bPieces.remove(board.findPiece(bPieces, sourceRow, sourceCol));
+            if (pieceColor.equals("Black"))
+                if (board.findPiece(wPieces, targetRow, targetCol) != null)
+                    wPieces.remove(board.findPiece(wPieces, sourceRow, sourceCol));
+            
+            // Update the arrayLists
+            board.setWhitePieces(wPieces);
+            board.setBlackPieces(bPieces);
+
+            // Update move history
+            board.addMove(newLocPiece, sourceRow, sourceCol,
+                    new Piece(targetButton.getPieceType(), targetButton.getRow(), targetButton.getCol(),
+                            targetButton.getPieceColor(), targetButton.getPieceImage(), targetButton.isOccupied()));
+
+            // Clear the source button
+            sourceButton.setPieceType(null);
+            sourceButton.setPieceColor(null);
+            sourceButton.setIcon(null);
+            chessBoard[sourceRow][sourceCol] = new EmptySquare("Empty Square", sourceRow, sourceCol, "Empty", null,
+                    false);
+            chessBoard[sourceRow][sourceCol].setPieceObject(null);
+
+            // Reset the background color of all squares
+            resetButtonColors(sourceButton);
+
+            // Update the turn
+            whiteTurn = !whiteTurn;
+            blackTurn = !blackTurn;
         }
 
         public void resetBoardColors() {
@@ -653,13 +745,26 @@ public class Game {
                     Color color = ((pieceButton.getRow() + pieceButton.getCol()) % 2 == 0) ? lightSquare : darkSquare;
                     pieceButton.setBackground(color);
 
-                    // Needed for debugging
-                    pieceButton.getRow();
-                    pieceButton.getCol();
                     frame.repaint();
                 }
             }
         }
+
+        private void endGame(String winner) {
+            String message = "Game Over!\n" + winner + " Wins";
+            int option = JOptionPane.showOptionDialog(frame, message, "Game Over", JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE, null, new Object[] { "New Game", "Exit" }, "New Game");
+
+            if (option == 0) {
+                // Start a new game
+                frame.dispose();
+                new Game();
+            } else {
+                // Exit the program
+                frame.dispose();
+            }
+        }
+
     }
 
     public static void main(String[] args) {

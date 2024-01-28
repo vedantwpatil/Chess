@@ -295,6 +295,10 @@ public class Piece extends JComponent {
         this.pieceObject = pieceObject;
     }
 
+    public String getOpponentColor() {
+        return (getPieceColor().equals("White")) ? "Black" : "White";
+    }
+
     @Override
     public String toString() {
         return "Piece [pieceType=" + pieceType + ", row=" + row + ", col=" + col
