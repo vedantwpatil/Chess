@@ -226,13 +226,23 @@ public class Board {
         return false;
     }
 
-    public void addMove(Piece piece, int sourceRow, int sourceCol, Piece pieceCaptured) {
-        // Don't need image and occupied information so we make a new piece object to
-        // add but we need where the piece moved from and the square its moving to, the
-        // Piece object will hold the current row col and the other ints will hold the
-        // original row col
-        Move Piece = new Move(piece, sourceRow, sourceCol, pieceCaptured);
-        moves.add(Piece);
+    public King findKing(Board board, Piece[][] chessBoard, String pieceColor) {
+        switch (pieceColor) {
+            case "White":
+                ArrayList<Piece> wPieces = board.getWhitePieces();
+                for (Piece piece : wPieces) {
+                    if (piece instanceof King)
+                        return (King) piece;
+                }
+
+            case "Black":
+                ArrayList<Piece> bPieces = board.getBlackPieces();
+                for (Piece piece : bPieces) {
+                    if (piece instanceof King)
+                        return (King) piece;
+                }
+        }
+        return null;
     }
 
     public ArrayList<Piece> getOpponentPieces(Piece piece) {
@@ -270,4 +280,34 @@ public class Board {
         }
         return null;
     }
+
+    public Boolean getCheckmate(Board board, Piece[][] chessBoard) {
+        King wKing = board.findKing(board, chessBoard, "White");
+        King bKing = board.findKing(board, chessBoard, "Black");
+
+        return wKing.isCheckmate(board, chessBoard) || bKing.isCheckmate(board, chessBoard);
+    }
+
+    // Chessbot
+    public Board(Board board) {
+        this.chessBoard = board.getChessBoard();
+        this.whitePieces = board.getWhitePieces();
+        this.blackPieces = board.getBlackPieces();
+        this.moves = board.getMoves();
+    }
+
+    public void addMove(Piece piece, int sourceRow, int sourceCol, Piece pieceCaptured) {
+        // Don't need image and occupied information so we make a new piece object to
+        // add but we need where the piece moved from and the square its moving to, the
+        // Piece object will hold the current row col and the other ints will hold the
+        // original row col
+        Move Piece = new Move(piece, sourceRow, sourceCol, pieceCaptured);
+        moves.add(Piece);
+    }
+
+    public void makeMove(Move move) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'makeMove'");
+    }
+
 }
