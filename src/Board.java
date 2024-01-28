@@ -226,12 +226,12 @@ public class Board {
         return false;
     }
 
-    public void addMove(Piece piece, int sourceRow, int sourceCol) {
+    public void addMove(Piece piece, int sourceRow, int sourceCol, Piece pieceCaptured) {
         // Don't need image and occupied information so we make a new piece object to
         // add but we need where the piece moved from and the square its moving to, the
         // Piece object will hold the current row col and the other ints will hold the
         // original row col
-        Move Piece = new Move(piece, sourceRow, sourceCol);
+        Move Piece = new Move(piece, sourceRow, sourceCol, pieceCaptured);
         moves.add(Piece);
     }
 

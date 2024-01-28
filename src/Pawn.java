@@ -58,17 +58,17 @@ public class Pawn extends Piece {
                 }
                 // Enpassent
                 if (lastMove != null) {
-                    if (lastMove.getPiece() instanceof Pawn && (colDiff == 1 && newRow == this.getRow())) {
-                        int moveRowDiff = lastMove.getPiece().getRow() - lastMove.getPastRow();
-                        if (moveRowDiff == 2) {
-                            return true;
-                        }
+                    if (lastMove.getPiece() instanceof Pawn
+                            && Math.abs(lastMove.getPastRow() - lastMove.getCurrentRow()) == 2
+                            && (colDiff == 1 && newRow == this.getRow())) {
+                        return true;
                     }
                 }
             }
         }
 
         return false; // If none of the conditions are met, the pawn cannot move to the new position
+
     }
 
     @Override

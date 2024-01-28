@@ -1,22 +1,14 @@
 public class Move {
     private Piece piece;
-    private int currentRow;
-    private int currentCol;
     private int pastRow;
     private int pastCol;
+    private Piece pieceCaptured;
 
-    public Move(Piece piece, int currentRow, int currentCol, int pastRow, int pastCol) {
-        this.piece = piece;
-        this.currentRow = currentRow;
-        this.currentCol = currentCol;
-        this.pastRow = pastRow;
-        this.pastCol = pastCol;
-    }
-
-    public Move(Piece piece, int pastRow, int pastCol) {
+    public Move(Piece piece, int pastRow, int pastCol, Piece pieceCaptured) {
         this.piece = piece;
         this.pastRow = pastRow;
         this.pastCol = pastCol;
+        this.pieceCaptured = pieceCaptured;
     }
 
     public Piece getPiece() {
@@ -44,19 +36,27 @@ public class Move {
     }
 
     public int getCurrentRow() {
-        return currentRow;
+        return piece.getRow();
     }
 
     public void setCurrentRow(int currentRow) {
-        this.currentRow = currentRow;
+        piece.setRow(currentRow);
     }
 
     public int getCurrentCol() {
-        return currentCol;
+        return piece.getCol();
     }
 
     public void setCurrentCol(int currentCol) {
-        this.currentCol = currentCol;
+        piece.setCol(currentCol);
+    }
+
+    public Piece getPieceCaptured() {
+        return pieceCaptured;
+    }
+
+    public void setPieceCaptured(Piece pieceCaptured) {
+        this.pieceCaptured = pieceCaptured;
     }
 
 }

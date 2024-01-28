@@ -95,7 +95,6 @@ public class Game {
                     if (row == 1) {
                         piece.setPieceType("Pawn");
                         piece.setIcon(wPawn);
-                        piece.setEnPassent(false);
                     }
                 }
 
@@ -125,7 +124,6 @@ public class Game {
                     if (row == 6) {
                         piece.setPieceType("Pawn");
                         piece.setIcon(bPawn);
-                        piece.setEnPassent(false);
                     }
                 }
                 piece.setRow(row);
@@ -230,7 +228,6 @@ public class Game {
         private ImageIcon pieceImage;
         private Color squareColor;
         private boolean isOccupied;
-        private boolean isEnPassent;
 
         public PieceButton() {
             setPreferredSize(new Dimension(900, 900));
@@ -323,14 +320,6 @@ public class Game {
             this.isOccupied = isOccupied;
         }
 
-        public boolean isEnPassent() {
-            return isEnPassent;
-        }
-
-        public void setEnPassent(boolean isEnPassent) {
-            this.isEnPassent = isEnPassent;
-        }
-
     }
 
     public class PieceListener implements ActionListener {
@@ -407,14 +396,6 @@ public class Game {
                 switch (pieceType) {
                     case "Pawn":
 
-                        // EnPassent
-                        if (sourceButton != null && targetButton != null) {
-                            int rowDiff = Math.abs(sourceButton.getRow() - targetButton.getRow());
-                            if (rowDiff == 2) {
-                                buttonClicked.setEnPassent(true);
-                            }
-                        }
-
                         Pawn tempPawn = new Pawn(pieceType, buttonClicked.getRow(), buttonClicked.getCol(),
                                 buttonClicked.getPieceColor(),
                                 buttonClicked.getPieceImage(), false);
@@ -485,50 +466,32 @@ public class Game {
 
             // Enpassant
             if (piece instanceof Pawn) {
-                Pawn testPawn = (Pawn) piece;
-                ArrayList<Piece> wPieces = board.getWhitePieces();
-                ArrayList<Piece> bPieces = board.getBlackPieces();
+                if (board.getLastMove() != null) {
+                    Pawn testPawn = (Pawn) piece;
+                    Move lastMove = board.getLastMove();
+                    int colDiff = Math.abs(testPawn.getCol() - lastMove.getCurrentCol());
 
-                if (testPawn.getPieceColor().equals("White")) {
-                    for (Piece blackPawn : bPieces) {
-                        if (blackPawn instanceof Pawn) {
-                            if (board.getLastMove() != null) {
-                                Move lastMove = board.getLastMove();
-
-                                int colDiff = Math.abs(testPawn.getCol() - blackPawn.getCol());
-
-                                // Enpassent
-                                if (colDiff == 1 && lastMove.getPiece() instanceof Pawn
-                                        && blackPawn.getRow() == testPawn.getRow()) {
-                                    Piece move = new Piece("Pawn", blackPawn.getRow(), blackPawn.getCol() - 1, "White",
-                                            blackPawn.getPieceImage(), true);
-                                    possibleMoves.add(move);
-                                }
-                            }
+                    // White Pawn
+                    if (piece.getPieceColor().equals("White")) {
+                        if (lastMove.getPiece().getPieceType().equals("Pawn")
+                                && Math.abs(lastMove.getPastRow() - lastMove.getCurrentRow()) == 2
+                                && (colDiff == 1 && testPawn.getRow() == lastMove.getCurrentRow())) {
+                            Piece move = new Piece(testPawn.getPieceType(), lastMove.getCurrentRow() + 1,
+                                    lastMove.getCurrentCol(), testPawn.getPieceColor(), testPawn.getPieceImage(),
+                                    false);
+                            possibleMoves.add(move);
                         }
                     }
-                }
-                if (testPawn.getPieceColor().equals("Black")) {
-                    for (Piece whitePawn : wPieces) {
-                        if (whitePawn instanceof Pawn) {
-                            if (board.getLastMove() != null) {
-                                Move lastMove = board.getLastMove();
 
-                                if (whitePawn.getRow() == 3 && Math.abs(whitePawn.getCol() - piece.getCol()) == 1) {
-                                    Piece move = new Piece("Pawn", whitePawn.getRow(), whitePawn.getCol() + 1, "White",
-                                            whitePawn.getPieceImage(), true);
-                                    possibleMoves.add(move);
-                                }
-                                // Enpassent
-                                int colDiff = Math.abs(testPawn.getCol() - whitePawn.getCol());
-
-                                if (colDiff == 1 && lastMove.getPiece() instanceof Pawn
-                                        && whitePawn.getRow() == testPawn.getRow()) {
-                                    Piece move = new Piece("Pawn", whitePawn.getRow(), whitePawn.getCol() - 1, "White",
-                                            whitePawn.getPieceImage(), true);
-                                    possibleMoves.add(move);
-                                }
-                            }
+                    // Black Pawn
+                    if (piece.getPieceColor().equals("Black")) {
+                        if (lastMove.getPiece().getPieceType().equals("Pawn")
+                                && Math.abs(lastMove.getPastRow() - lastMove.getCurrentRow()) == 2
+                                && (colDiff == 1 && testPawn.getRow() == lastMove.getCurrentRow())) {
+                            Piece move = new Piece(testPawn.getPieceType(), lastMove.getCurrentRow() - 1,
+                                    lastMove.getCurrentCol(), testPawn.getPieceColor(), testPawn.getPieceImage(),
+                                    false);
+                            possibleMoves.add(move);
                         }
                     }
                 }
@@ -661,7 +624,9 @@ public class Game {
             board.setBlackPieces(bPieces);
 
             // Update move history
-            board.addMove(newLocPiece, sourceRow, sourceCol);
+            board.addMove(newLocPiece, sourceRow, sourceCol,
+                    new Piece(targetButton.getPieceType(), targetButton.getRow(), targetButton.getCol(),
+                            targetButton.getPieceColor(), targetButton.getPieceImage(), targetButton.isOccupied()));
 
             // Clear the source button
             sourceButton.setPieceType(null);
@@ -681,7 +646,6 @@ public class Game {
 
         public void movePieceLogic(Board board, PieceButton sourceButton, PieceButton targetButton) {
 
-            // Board is somehow null
             ArrayList<Piece> wPieces = board.getWhitePieces();
             ArrayList<Piece> bPieces = board.getBlackPieces();
 
@@ -695,6 +659,16 @@ public class Game {
             int targetCol = targetButton.getCol();
             int sourceRow = sourceButton.getRow();
             int sourceCol = sourceButton.getCol();
+
+            // Check for en passant capture
+            if (pieceType.equals("Pawn") && sourceCol != targetCol && targetButton.getPieceType() == null) {
+                // En passant capture: remove the captured pawn's image
+                int capturedPawnRow = sourceRow;
+                int capturedPawnCol = targetCol;
+
+                // Remove the icon from the corresponding PieceButton
+                ((PieceButton) (buttonList[capturedPawnRow][capturedPawnCol])).setIcon(null);
+            }
 
             // Update the target button with the piece information
             targetButton.setPieceType(pieceType);
@@ -730,13 +704,15 @@ public class Game {
             if (pieceColor.equals("Black"))
                 if (board.findPiece(wPieces, targetRow, targetCol) != null)
                     wPieces.remove(board.findPiece(wPieces, sourceRow, sourceCol));
-
+            
             // Update the arrayLists
             board.setWhitePieces(wPieces);
             board.setBlackPieces(bPieces);
 
             // Update move history
-            board.addMove(newLocPiece, sourceRow, sourceCol);
+            board.addMove(newLocPiece, sourceRow, sourceCol,
+                    new Piece(targetButton.getPieceType(), targetButton.getRow(), targetButton.getCol(),
+                            targetButton.getPieceColor(), targetButton.getPieceImage(), targetButton.isOccupied()));
 
             // Clear the source button
             sourceButton.setPieceType(null);
@@ -765,9 +741,6 @@ public class Game {
                     Color color = ((pieceButton.getRow() + pieceButton.getCol()) % 2 == 0) ? lightSquare : darkSquare;
                     pieceButton.setBackground(color);
 
-                    // Needed for debugging
-                    pieceButton.getRow();
-                    pieceButton.getCol();
                     frame.repaint();
                 }
             }
