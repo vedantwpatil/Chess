@@ -359,31 +359,35 @@ public class Game {
             }
 
             // Check if the button clicked is the source button
-            if (buttonClicked == sourceButton) {
-                // Reset the source button
-                sourceButton = null;
-            } else if (sourceButton == null && ((buttonClicked.getPieceColor().equals("White") && whiteTurn)
-                    || (buttonClicked.getPieceColor().equals("Black") && blackTurn))) {
-                // Set the source button
-                sourceButton = buttonClicked;
-            } else if (buttonClicked.getPieceColor() == sourceButton.getPieceColor()) {
-                // If you click another piece of the same color, that is now the new source
-                // piece
-                resetBoardColors();
-                sourceButton = buttonClicked;
-                targetButton = null;
-            } else if (buttonClicked.getBackground().equals(canMoveToSquare) && sourceButton != null) {
-                // The source button is already set, so the button clicked must be the target
-                // button
-                targetButton = buttonClicked;
-
-                // Call the movePiece method passing the source and target buttons as arguments
-                movePiece(board, sourceButton, buttonClicked, canMoveToSquare);
-                // Reset the source and target buttons
-                sourceButton = null;
-                targetButton = null;
+            try {
+                if (buttonClicked == sourceButton) {
+                    // Reset the source button
+                    sourceButton = null;
+                } else if (sourceButton == null && ((buttonClicked.getPieceColor().equals("White") && whiteTurn)
+                        || (buttonClicked.getPieceColor().equals("Black") && blackTurn))) {
+                    // Set the source button
+                    sourceButton = buttonClicked;
+                } else if (buttonClicked.getPieceColor() == sourceButton.getPieceColor()) {
+                    // If you click another piece of the same color, that is now the new source
+                    // piece
+                    resetBoardColors();
+                    sourceButton = buttonClicked;
+                    targetButton = null;
+                } else if (buttonClicked.getBackground().equals(canMoveToSquare) && sourceButton != null) {
+                    // The source button is already set, so the button clicked must be the target
+                    // button
+                    targetButton = buttonClicked;
+    
+                    // Call the movePiece method passing the source and target buttons as arguments
+                    movePiece(board, sourceButton, buttonClicked, canMoveToSquare);
+                    // Reset the source and target buttons
+                    sourceButton = null;
+                    targetButton = null;
+                }
+            } catch (Exception nullPointerException) {
+                // TODO: handle exception
             }
-
+            
             // Highlights selected piece/square
 
             highlightSelectedSquare(buttonClicked, selectedSquare, lightSquare, darkSquare);
